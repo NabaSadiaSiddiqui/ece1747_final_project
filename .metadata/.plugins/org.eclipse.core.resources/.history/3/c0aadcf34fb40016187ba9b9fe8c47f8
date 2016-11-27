@@ -1,0 +1,14 @@
+
+package com.ece1747.serialized;
+
+
+public class Decoder {
+
+	public Decoder() {
+		
+	}
+
+	public static void main(String[] args) {
+		System.out.print("Whats up?");
+	}
+}

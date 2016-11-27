@@ -1,0 +1,29 @@
+/**
+ *	CLASS: Decoder
+ *	PURPOSE: Read the log file, parse the data, decode the data into accel and gyro X, Y, Z and then graph the data. 
+ */
+package com.ece1747.serialized;
+
+import java.lang.System;
+
+/**
+ * @author vipinbb
+ *
+ */
+public class Decoder {
+
+	/**
+	 *	@param none 
+	 */
+	public Decoder() {
+		
+	}
+
+	/**
+	 * @param args
+	 */
+	public static void main(String[] args) {
+	
+	}
+
+}
