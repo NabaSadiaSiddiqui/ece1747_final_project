@@ -1,0 +1,41 @@
+
+package com.ece1747.serialized;
+
+import java.io.*;
+
+public class Decoder {
+
+	public Decoder() {
+		
+	}
+
+	/**
+	 * 
+	 * @param args
+	 * Input file into the system containing the log file for decoding.
+	 */
+	public static void main(String[] args) throws IOException{
+		// Check if args are valid, if not exit.
+		if (args[0] == null)
+		{
+			System.out.print("No valid file. Exiting");
+			return;
+		}
+		
+		// Module has a valid file.
+		System.out.print("Log File: " + args[0]);
+		FileReader fileReader = new FileReader(args[0]);
+		BufferedReader bt = new BufferedReader(fileReader);
+	
+		// Setup I/O
+		try 
+		{
+			// Make input / output streams and start reading the log file.
+			
+		}
+		catch (FileNotFoundException e)
+		{
+			System.out.print("Exception: " + e.toString());
+		}
+	}
+}

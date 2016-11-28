@@ -1,0 +1,79 @@
+
+package com.ece1747.serialized;
+
+import java.io.*;
+
+public class Decoder {
+
+	public Decoder() {
+		
+	}
+	
+	/**
+	 * This function detects the word "Value:" in a line and parses the line such that 
+	 * only the bytes succeeding the string are placed in the return string. 
+	 * i.e: all the sensor data bytes.
+	 * 
+	 * @param Line: The latest line read from the file.
+	 * @return: String if line had valid data to be decoded.
+	 *  		null if line did not have to be decoded.
+	 */
+	private static String parseGenericLine(String Line)
+	{
+		boolean contains = Line.matches("\\b Value: \\b");
+		
+		// Check if it contains string.
+		if (!contains)
+			return null;
+		
+		return  Line.substring(Line.lastIndexOf(" Value: "));
+	}
+
+	/**
+	 * 
+	 * @param args
+	 * Input file into the system containing the log file for decoding.
+	 */
+	public static void main(String[] args) throws IOException{
+		// Check if args are valid, if not exit.
+		if (args[0] == null)
+		{
+			System.out.print("No valid file. Exiting");
+			return;
+		}
+		
+		// Module has a valid file.
+		System.out.print("Log File: " + args[0] + "\n");
+		
+		// Create and Start reading File Data.
+		FileReader fileReader = new FileReader(args[0]);
+		try (BufferedReader br = new BufferedReader(fileReader))
+		{
+			// Read line by line.
+			String line;
+			
+			// Burn the first 20 lines since they dont contain valid data
+			for (int i = 0; i < 20; i++)
+				br.readLine();
+			
+			// Start reading the valid lines.
+			while ((line = br.readLine()) != null)
+			{
+				// Valid line.
+				if (parseGenericLine(line) != null)
+				{
+					// This line has valid data.
+					System.out.print("Sensor Data:" + line + "\n");
+				}
+			}
+		}
+		catch (FileNotFoundException e)
+		{
+			System.out.print("Exception: " + e.toString() + "\n");
+		}
+	
+		// Setup I/O
+		
+	
+	}
+}
