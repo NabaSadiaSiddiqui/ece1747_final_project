@@ -4,10 +4,11 @@ package com.ece1747.serialized;
 import java.io.*;
 import java.text.ParseException;
 
+
 public class Decoder {
 
 	public Decoder() {
-		
+		ChartPanel
 	}
 	
 	/**
@@ -52,6 +53,7 @@ public class Decoder {
 		            | ((sensorData[16] & 0xFF) << 24);
 			
 			System.out.print("Accel:" + timestampaccel + " " + Float.intBitsToFloat(accelx) + " " + Float.intBitsToFloat(accely) + " " + Float.intBitsToFloat(accelz) + "\n"); 
+			
 		}
 		else if (sensorData[0] == 2)	// Check if Gyro data.
 		{
