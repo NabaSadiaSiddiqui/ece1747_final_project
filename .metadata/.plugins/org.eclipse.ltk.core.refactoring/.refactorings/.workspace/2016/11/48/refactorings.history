@@ -1,4 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<session version="1.0">
-<refactoring comment="Delete resource &apos;ece1747_processing_nonparallelized&apos;" deleteContents="true" description="Delete resource &apos;ece1747_processing_nonparallelized&apos;" element1="/ece1747_processing_nonparallelized" flags="7" id="org.eclipse.ltk.core.refactoring.delete.resources" resources="1" stamp="1480204626639"/>
-</session>
