@@ -3,4 +3,5 @@
 .settings/
 RemoteSystemsTempFiles/
 /bin/
-.classpath
+*.classpath
+*.jpeg
