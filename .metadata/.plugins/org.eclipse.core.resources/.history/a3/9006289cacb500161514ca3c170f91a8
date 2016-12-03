@@ -1,6 +1,8 @@
+
 package com.ece1747.serialized;
 
 import java.io.*;
+import java.text.ParseException;
 
 
 public class Decoder {
@@ -10,22 +12,23 @@ public class Decoder {
 	
 	/**
 	 * This function detects the word "Value:" in a line and parses the line such that 
-	 * only the bytes succeeding the string are placed in the return string. The bytes are 
-	 * then parsed into their corresponding time and accel / gyro values.
+	 * only the bytes succeeding the string are placed in the return string. 
 	 * i.e: all the sensor data bytes.
 	 * 
-	 * @param   Line: The latest line read from the file.
+	 * @param Line: The latest line read from the file.
 	 * @return: String if line had valid data to be decoded.
-	 *  		null if line did not have to be decoded. 
+	 *  		null if line did not have to be decoded.
+	 * @throws ParseException 
 	 */
 	private static String parseGenericLine(String Line)
 	{
 		// Check if it contains string.
-		if (Line.indexOf("Notify,0x") == -1)
+		if (Line.indexOf("Value:") == -1)
 			return null;
 		
 		// Create new string with Value: XX-XX-XX-XX-XX-XX-XX-XX-XX-XX-XX-XX-XX-XX-XX-XX-XX-XX-XX-XX
-		String subString = Line.substring(Line.lastIndexOf("Notify,0x") + 9);
+		String subString = Line.substring(Line.lastIndexOf("Value: ") + 7);
+		subString = subString.replaceAll("-", "");
 		byte[] sensorData = hexStringToByteArray(subString);
 		
 		// Check if accel data.
@@ -73,29 +76,9 @@ public class Decoder {
 			
 			System.out.print("Gyro: " + timestampgyro + " " + Float.intBitsToFloat(gyrox) + " " + Float.intBitsToFloat(gyroy) + " " + Float.intBitsToFloat(gyroz) + "\n");  
 		}
-		else if (sensorData[0] == 3)	// Get Angular Data.
-		{
-			int rollx = (sensorData[1] & 0xFF) 
-		            | ((sensorData[2] & 0xFF) << 8) 
-		            | ((sensorData[3] & 0xFF) << 16) 
-		            | ((sensorData[4] & 0xFF) << 24);
-			int pitchy = (sensorData[5] & 0xFF) 
-		            | ((sensorData[6] & 0xFF) << 8) 
-		            | ((sensorData[7] & 0xFF) << 16) 
-		            | ((sensorData[8] & 0xFF) << 24);
-			int yawz = (sensorData[9] & 0xFF) 
-		            | ((sensorData[10] & 0xFF) << 8) 
-		            | ((sensorData[11] & 0xFF) << 16) 
-		            | ((sensorData[12] & 0xFF) << 24);
-			int timestamp = (sensorData[13] & 0xFF) 
-		            | ((sensorData[14] & 0xFF) << 8) 
-		            | ((sensorData[15] & 0xFF) << 16) 
-		            | ((sensorData[16] & 0xFF) << 24);
-			
-			
-			System.out.print("Rollx Pitchy Yawz: " + timestamp + " " + Float.intBitsToFloat(rollx) + " " + Float.intBitsToFloat(pitchy) + " " + Float.intBitsToFloat(yawz) + "\n");  
-		}
-	       
+		
+		
+		
 		return  null;
 	}
 
@@ -138,8 +121,8 @@ public class Decoder {
 			String line;
 			
 			// Burn the first 20 lines since they dont contain valid data
-			//			for (int i = 0; i < 20; i++)
-			//	br.readLine();
+			for (int i = 0; i < 20; i++)
+				br.readLine();
 			
 			// Start reading the valid lines.
 			while ((line = br.readLine()) != null)

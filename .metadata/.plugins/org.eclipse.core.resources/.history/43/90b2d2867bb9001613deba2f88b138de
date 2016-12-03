@@ -87,13 +87,13 @@ public class Decoder {
 		            | ((sensorData[10] & 0xFF) << 8) 
 		            | ((sensorData[11] & 0xFF) << 16) 
 		            | ((sensorData[12] & 0xFF) << 24);
-			int timestamp = (sensorData[13] & 0xFF) 
+			int timestampgyro = (sensorData[13] & 0xFF) 
 		            | ((sensorData[14] & 0xFF) << 8) 
 		            | ((sensorData[15] & 0xFF) << 16) 
 		            | ((sensorData[16] & 0xFF) << 24);
 			
 			
-			System.out.print("Rollx Pitchy Yawz: " + timestamp + " " + Float.intBitsToFloat(rollx) + " " + Float.intBitsToFloat(pitchy) + " " + Float.intBitsToFloat(yawz) + "\n");  
+			System.out.print("Gyro: " + timestampgyro + " " + Float.intBitsToFloat(gyrox) + " " + Float.intBitsToFloat(gyroy) + " " + Float.intBitsToFloat(gyroz) + "\n");  
 		}
 	       
 		return  null;

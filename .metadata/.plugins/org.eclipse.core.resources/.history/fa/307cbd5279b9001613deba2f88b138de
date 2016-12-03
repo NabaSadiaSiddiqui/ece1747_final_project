@@ -25,7 +25,7 @@ public class Decoder {
 			return null;
 		
 		// Create new string with Value: XX-XX-XX-XX-XX-XX-XX-XX-XX-XX-XX-XX-XX-XX-XX-XX-XX-XX-XX-XX
-		String subString = Line.substring(Line.lastIndexOf("Notify,0x") + 9);
+		String subString = Line.substring(Line.lastIndexOf("Notify,0x") + 8);
 		byte[] sensorData = hexStringToByteArray(subString);
 		
 		// Check if accel data.
@@ -73,28 +73,7 @@ public class Decoder {
 			
 			System.out.print("Gyro: " + timestampgyro + " " + Float.intBitsToFloat(gyrox) + " " + Float.intBitsToFloat(gyroy) + " " + Float.intBitsToFloat(gyroz) + "\n");  
 		}
-		else if (sensorData[0] == 3)	// Get Angular Data.
-		{
-			int rollx = (sensorData[1] & 0xFF) 
-		            | ((sensorData[2] & 0xFF) << 8) 
-		            | ((sensorData[3] & 0xFF) << 16) 
-		            | ((sensorData[4] & 0xFF) << 24);
-			int pitchy = (sensorData[5] & 0xFF) 
-		            | ((sensorData[6] & 0xFF) << 8) 
-		            | ((sensorData[7] & 0xFF) << 16) 
-		            | ((sensorData[8] & 0xFF) << 24);
-			int yawz = (sensorData[9] & 0xFF) 
-		            | ((sensorData[10] & 0xFF) << 8) 
-		            | ((sensorData[11] & 0xFF) << 16) 
-		            | ((sensorData[12] & 0xFF) << 24);
-			int timestamp = (sensorData[13] & 0xFF) 
-		            | ((sensorData[14] & 0xFF) << 8) 
-		            | ((sensorData[15] & 0xFF) << 16) 
-		            | ((sensorData[16] & 0xFF) << 24);
-			
-			
-			System.out.print("Rollx Pitchy Yawz: " + timestamp + " " + Float.intBitsToFloat(rollx) + " " + Float.intBitsToFloat(pitchy) + " " + Float.intBitsToFloat(yawz) + "\n");  
-		}
+		
 	       
 		return  null;
 	}
