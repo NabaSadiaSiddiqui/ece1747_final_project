@@ -11,3 +11,5 @@ hadoop fs -put $HADOOP_HOME/LICENSE.txt /var/app/hadoop/input
 # Run MapReduce job
 hadoop jar app.jar App /var/app/hadoop/data/input /var/app/hadoop/data/output
 
+# Clean up .class files
+rm *.class
