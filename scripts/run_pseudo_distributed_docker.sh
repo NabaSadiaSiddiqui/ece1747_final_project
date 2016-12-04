@@ -9,7 +9,7 @@ hadoop fs -mkdir -p /var/app/hadoop/data/input
 hadoop fs -put $HADOOP_HOME/LICENSE.txt /var/app/hadoop/input
 
 # Run MapReduce job
-hadoop jar app.jar App /var/app/hadoop/data/input /var/app/hadoop/data/output
+hadoop jar app.jar App /var/app/hadoop/data/input/* /var/app/hadoop/data/*
 
 # Clean up .class files
 rm *.class
