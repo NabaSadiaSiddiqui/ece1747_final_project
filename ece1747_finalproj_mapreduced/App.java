@@ -1,5 +1,3 @@
-package ece1747.mapreduce;
-
 import java.io.IOException;
 import java.util.StringTokenizer;
 
