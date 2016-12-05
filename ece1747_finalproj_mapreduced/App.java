@@ -151,7 +151,7 @@ public class App {
 		public void reduce(IntWritable key, Iterable<SensorDataWritable> values, Context context) throws IOException, InterruptedException {
 		
 			for (SensorDataWritable val : values) {
-				SensorData sensorData = (SensorData) val.get();
+				SensorData sensorData = val.toSensorData();
 				Float[] data;
 				switch(sensorData.getSensorType()) {
 					case 1: // accel

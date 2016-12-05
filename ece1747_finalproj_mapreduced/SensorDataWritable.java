@@ -41,5 +41,21 @@ public class SensorDataWritable implements Writable {
 		sensorType.write(out);
 		sensorValues.write(out);
 	}
+
+        public SensorData toSensorData() {
+		SensorData sensorData = new SensorData();
+		sensorData.setTimestamp(timestamp.get());
+		sensorData.setSensorType(sensorType.get());
+		Writable[] writables = sensorValues.get();
+		Float[] sensorValuesArr = new Float[writables.length];
+		int i=0;
+		for(Writable writable : writables) {
+			FloatWritable floatWritable = (FloatWritable)writable;			
+			sensorValuesArr[i] = floatWritable.get();
+			i++;
+		}
+		sensorData.setSensorValues(sensorValuesArr);
+		return sensorData;
+	}
 }
 
