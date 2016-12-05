@@ -18,11 +18,12 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 public class App {
 	
 	// Mapper<keyIn, valueIn, keyOut, valueOut>
-	public static class TokenizerMapper extends Mapper<Object, Text, Integer, ObjectWritable>{
+	public static class TokenizerMapper extends Mapper<Object, Text, IntWritable, SensorDataWritable> {
+
 		public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
 			SensorData sensorData = parseGenericLine(value.toString());
-			ObjectWritable objectWritable = new ObjectWritable(SensorData.class, sensorData);
-			context.write(sensorData.getTimestamp(), objectWritable);
+			SensorDataWritable sdWritable = new SensorDataWritable(sensorData.getTimestamp(), sensorData.getSensorType(), sensorData.getSensorValues());
+			context.write(new IntWritable(sensorData.getTimestamp()), sdWritable);
 		}
 		
 		/**
@@ -143,13 +144,13 @@ public class App {
 	}
 
 	// Reduce<keyIn, valueIn, keyOut, valueOut>
-	public static class IntSumReducer extends Reducer<Integer, ObjectWritable, Integer, ObjectWritable> {
+	public static class IntSumReducer extends Reducer<Integer, SensorDataWritable, IntWritable, ObjectWritable> {
 		private GraphData accelGraph = new GraphData();
 		private GraphData gyroGraph = new GraphData();
 		private GraphData angularGraph = new GraphData();
-		public void reduce(Integer key, Iterable<ObjectWritable> values, Context context) throws IOException, InterruptedException {
+		public void reduce(IntWritable key, Iterable<SensorDataWritable> values, Context context) throws IOException, InterruptedException {
 		
-			for (ObjectWritable val : values) {
+			for (SensorDataWritable val : values) {
 				SensorData sensorData = (SensorData) val.get();
 				Float[] data;
 				switch(sensorData.getSensorType()) {
@@ -193,10 +194,12 @@ public class App {
 		Job job = Job.getInstance(conf, "word count");
 		job.setJarByClass(App.class);
 		job.setMapperClass(TokenizerMapper.class);
-		job.setCombinerClass(IntSumReducer.class);
+		job.setMapOutputKeyClass(IntWritable.class);
+		job.setMapOutputValueClass(SensorDataWritable.class);
+		//job.setCombinerClass(IntSumReducer.class);
 		job.setReducerClass(IntSumReducer.class);
-		job.setOutputKeyClass(Text.class);
-		job.setOutputValueClass(IntWritable.class);
+		job.setOutputKeyClass(IntWritable.class);
+		job.setOutputValueClass(ObjectWritable.class);
 		FileInputFormat.addInputPath(job, new Path(args[0]));
 		FileOutputFormat.setOutputPath(job, new Path(args[1]));
 		System.exit(job.waitForCompletion(true) ? 0 : 1);
