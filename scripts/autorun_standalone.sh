@@ -7,10 +7,10 @@
 # Compile using Hadoop and create JAR.
 echo "Compiling program..."
 hadoop com.sun.tools.javac.Main ../ece1747_finalproj_mapreduced/*.java
-jar cf App.jar ../ece1747_finalproj_mapreduced/*.class
+jar cf ../ece1747_finalproj_mapreduced/App.jar ../ece1747_finalproj_mapreduced/*.class
 
 # Run in standalone mode.
 echo "Running Hadoop Task..."
 rm -r ../data/outputs
-hadoop jar App.jar App  ../data/* ../data/outputs/
+hadoop jar ../ece1747_finalproj_mapreduced/App.jar App  ../data/* ../data/outputs/
 
