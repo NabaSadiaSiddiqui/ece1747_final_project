@@ -11,12 +11,8 @@ import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
-/**
- * Hello world!
- *
- */
 public class App {
-	
+
 	// Mapper<keyIn, valueIn, keyOut, valueOut>
 	public static class TokenizerMapper extends Mapper<Object, Text, IntWritable, SensorDataWritable> {
 
@@ -191,7 +187,7 @@ public class App {
 
 	public static void main(String[] args) throws Exception {
 		Configuration conf = new Configuration();
-		Job job = Job.getInstance(conf, "word count");
+		Job job = Job.getInstance(conf, "Sensor Parser");
 		job.setJarByClass(App.class);
 		job.setMapperClass(TokenizerMapper.class);
 		job.setMapOutputKeyClass(IntWritable.class);
