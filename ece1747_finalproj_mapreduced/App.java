@@ -4,6 +4,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.ObjectWritable;
+import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -14,25 +15,16 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 public class App {
 
 	// Mapper<keyIn, valueIn, keyOut, valueOut>
-	public static class TokenizerMapper extends Mapper<Object, Text, IntWritable, SensorDataWritable> {
+	public static class TokenizerMapper extends Mapper<Object, Text, IntWritable, DoubleWritable> {
 
 		public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
-			SensorData sensorData = parseGenericLine(value.toString());
-			SensorDataWritable sdWritable = new SensorDataWritable(sensorData.getTimestamp(), sensorData.getSensorType(), sensorData.getSensorValues());
-			context.write(new IntWritable(sensorData.getTimestamp()), sdWritable);
+			SensorData sensorData = extractAcceleration(value.toString());
+			if(sensorData != null) {
+				context.write(new IntWritable(sensorData.getTimestamp()), new DoubleWritable(sensorData.getMagnitude()));
+			}
 		}
 		
-		/**
-		 * This function detects the word "Value:" in a line and parses the line such that 
-		 * only the bytes succeeding the string are placed in the return string. The bytes are 
-		 * then parsed into their corresponding time and accel / gyro values.
-		 * i.e: all the sensor data bytes.
-		 * 
-		 * @param   Line: The latest line read from the file.
-		 * @return: String if line had valid data to be decoded.
-		 *  		null if line did not have to be decoded. 
-		 */
-		private static SensorData parseGenericLine(String Line)
+		private static SensorData extractAcceleration(String Line)
 		{
 			// Check if it contains string.
 			if (Line.indexOf("Notify,0x") == -1)
@@ -69,65 +61,15 @@ public class App {
 				data[0] = Float.intBitsToFloat(accelx);
 				data[1] = Float.intBitsToFloat(accely);
 				data[2] = Float.intBitsToFloat(accelz);
+
+				sData.setTimestamp(timestamp);
+				sData.setSensorValues(data);
+			} else {
+				sData = null;
 			}
-			else if (sensorData[0] == 2)	// Check if Gyro data.
-			{
-				int gyrox = (sensorData[1] & 0xFF) 
-			            | ((sensorData[2] & 0xFF) << 8) 
-			            | ((sensorData[3] & 0xFF) << 16) 
-			            | ((sensorData[4] & 0xFF) << 24);
-				int gyroy = (sensorData[5] & 0xFF) 
-			            | ((sensorData[6] & 0xFF) << 8) 
-			            | ((sensorData[7] & 0xFF) << 16) 
-			            | ((sensorData[8] & 0xFF) << 24);
-				int gyroz = (sensorData[9] & 0xFF) 
-			            | ((sensorData[10] & 0xFF) << 8) 
-			            | ((sensorData[11] & 0xFF) << 16) 
-			            | ((sensorData[12] & 0xFF) << 24);
-				timestamp = (sensorData[13] & 0xFF) 
-			            | ((sensorData[14] & 0xFF) << 8) 
-			            | ((sensorData[15] & 0xFF) << 16) 
-			            | ((sensorData[16] & 0xFF) << 24);
-								
-				data[0] = Float.intBitsToFloat(gyrox);
-				data[1] = Float.intBitsToFloat(gyroy);
-				data[2] = Float.intBitsToFloat(gyroz);
-			}
-			else if (sensorData[0] == 3)	// Get Angular Data.
-			{
-				int rollx = (sensorData[1] & 0xFF) 
-			            | ((sensorData[2] & 0xFF) << 8) 
-			            | ((sensorData[3] & 0xFF) << 16) 
-			            | ((sensorData[4] & 0xFF) << 24);
-				int pitchy = (sensorData[5] & 0xFF) 
-			            | ((sensorData[6] & 0xFF) << 8) 
-			            | ((sensorData[7] & 0xFF) << 16) 
-			            | ((sensorData[8] & 0xFF) << 24);
-				int yawz = (sensorData[9] & 0xFF) 
-			            | ((sensorData[10] & 0xFF) << 8) 
-			            | ((sensorData[11] & 0xFF) << 16) 
-			            | ((sensorData[12] & 0xFF) << 24);
-				timestamp = (sensorData[13] & 0xFF) 
-			            | ((sensorData[14] & 0xFF) << 8) 
-			            | ((sensorData[15] & 0xFF) << 16) 
-			            | ((sensorData[16] & 0xFF) << 24);
-				
-				data[0] = Float.intBitsToFloat(rollx);
-				data[1] = Float.intBitsToFloat(pitchy);
-				data[2] = Float.intBitsToFloat(yawz);
-			}
-		    
-			sData.setSensorType(sensorData[0]);
-			sData.setSensorValues(data);
-			sData.setTimestamp(timestamp);
 			return  sData;
 		}
 
-		/**
-		 * 
-		 * @param s
-		 * @return
-		 */
 		private static byte[] hexStringToByteArray(String s) {
 		    int len = s.length();
 		    byte[] data = new byte[len / 2];
@@ -140,48 +82,12 @@ public class App {
 	}
 
 	// Reduce<keyIn, valueIn, keyOut, valueOut>
-	public static class IntSumReducer extends Reducer<Integer, SensorDataWritable, IntWritable, ObjectWritable> {
-		private GraphData accelGraph = new GraphData();
-		private GraphData gyroGraph = new GraphData();
-		private GraphData angularGraph = new GraphData();
-		public void reduce(IntWritable key, Iterable<SensorDataWritable> values, Context context) throws IOException, InterruptedException {
+	public static class IntSumReducer extends Reducer<IntWritable, DoubleWritable, IntWritable, DoubleWritable> {
+		public void reduce(IntWritable key, Iterable<DoubleWritable> values, Context context) throws IOException, InterruptedException {
 		
-			for (SensorDataWritable val : values) {
-				SensorData sensorData = val.toSensorData();
-				Float[] data;
-				switch(sensorData.getSensorType()) {
-					case 1: // accel
-						data = sensorData.getSensorValues();
-						accelGraph.addSensorX(data[0]);
-						accelGraph.addSensorY(data[1]);
-						accelGraph.addSensorZ(data[2]);
-						accelGraph.addTimestamp(sensorData.getTimestamp());
-						break;
-					case 2: // gyro
-						data = sensorData.getSensorValues();
-						gyroGraph.addSensorX(data[0]);
-						gyroGraph.addSensorY(data[1]);
-						gyroGraph.addSensorZ(data[2]);
-						gyroGraph.addTimestamp(sensorData.getTimestamp());
-						break;
-					case 3: // angular
-						data = sensorData.getSensorValues();
-						angularGraph.addSensorX(data[0]);
-						angularGraph.addSensorY(data[1]);
-						angularGraph.addSensorZ(data[2]);
-						angularGraph.addTimestamp(sensorData.getTimestamp());
-						break;
-					default:
-						System.err.println("We are getting some unknown sensor data type here");
-						break;
-				}
+			for (DoubleWritable acceleration : values) {
+				context.write(key, acceleration);
 			}
-			ObjectWritable objectWritable = new ObjectWritable(GraphData.class, accelGraph);
-			context.write(key, objectWritable);
-			objectWritable = new ObjectWritable(GraphData.class, gyroGraph);
-			context.write(key, objectWritable);
-			objectWritable = new ObjectWritable(GraphData.class, angularGraph);
-			context.write(key, objectWritable);
 		}
 	}
 
@@ -190,12 +96,10 @@ public class App {
 		Job job = Job.getInstance(conf, "Sensor Parser");
 		job.setJarByClass(App.class);
 		job.setMapperClass(TokenizerMapper.class);
-		job.setMapOutputKeyClass(IntWritable.class);
-		job.setMapOutputValueClass(SensorDataWritable.class);
-		//job.setCombinerClass(IntSumReducer.class);
+		job.setCombinerClass(IntSumReducer.class);
 		job.setReducerClass(IntSumReducer.class);
 		job.setOutputKeyClass(IntWritable.class);
-		job.setOutputValueClass(ObjectWritable.class);
+		job.setOutputValueClass(DoubleWritable.class);
 		FileInputFormat.addInputPath(job, new Path(args[0]));
 		FileOutputFormat.setOutputPath(job, new Path(args[1]));
 		System.exit(job.waitForCompletion(true) ? 0 : 1);

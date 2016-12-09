@@ -5,7 +5,6 @@ public class SensorData implements Serializable {
 
 	private Float[] sensorValues;
 	private int timestamp;
-	private int sensorType;
 	
 	public Float[] getSensorValues() {
 		return sensorValues;
@@ -22,12 +21,9 @@ public class SensorData implements Serializable {
 	public void setTimestamp(int timestamp) {
 		this.timestamp = timestamp;
 	}
-	
-	public int getSensorType() {
-		return sensorType;
-	}
-	
-	public void setSensorType(int sensorType) {
-		this.sensorType = sensorType;
+
+	public double getMagnitude() {
+		double sum = Math.pow(sensorValues[0], 2) + Math.pow(sensorValues[1], 2) + Math.pow(sensorValues[2], 2);
+		return Math.sqrt(sum);
 	}
 }
